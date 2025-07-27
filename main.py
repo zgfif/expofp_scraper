@@ -2,9 +2,23 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
+import csv
 
 
 URL = 'https://ice25.expofp.com/'
+
+
+def create_csv(filename='output.csv'):
+    with open(filename, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        # Записываем заголовки столбцов
+        writer.writerow(['id', 'name', 'description', 'phone', 'website', 'mail'])
+
+
+def add_to_csv(data: list, filename='output.csv'):
+    with open(filename, mode='a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(data)
 
 
 def expand_shadow_element(driver, element):
@@ -111,6 +125,7 @@ def get_company_name(driver):
     company_name = overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
     return company_name
 
+
 def info_company_block(driver):
     # 1. Получаем хост Shadow DOM
     shadow_host = driver.find_element(By.CSS_SELECTOR, 'div.expofp-floorplan > div')
@@ -123,39 +138,50 @@ def info_company_block(driver):
     overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
     overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
     overlay_content_scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
-    exhibitor_details = overlay_content_scrollable.find_element(By.CSS_SELECTOR, 'div.exhibitor__details')
-    return exhibitor_details
+    exhibitor_details = overlay_content_scrollable.find_elements(By.CSS_SELECTOR, 'div.exhibitor__details')
+    if exhibitor_details:
+        return exhibitor_details[0]
+    else:
+        return None
 
 
 def get_company_description(driver):
     exhibitor_details = info_company_block(driver)
+    if not exhibitor_details:
+        return ''
     exibitor_description = exhibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-description')
     if exibitor_description:
         return exibitor_description[0].text
     return ''
 
+
 def meta_company_block(driver):
     exhibitor_details = info_company_block(driver)
+    if not exhibitor_details:
+        return ''
     exibitor_meta = exhibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta')
     if exibitor_meta:
         return exibitor_meta[0]
     return None
 
-def get_company_phone(driver):
+
+def get_company_address(driver):
     if meta_company_block(driver):
         exibitor_meta_items = meta_company_block(driver).find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
         if len(exibitor_meta_items) > 0:
             return exibitor_meta_items[0].text
     return ''
 
-def get_company_website(driver):
+
+def get_company_phone(driver):
     if meta_company_block(driver):
         exibitor_meta_items = meta_company_block(driver).find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
         if len(exibitor_meta_items) > 1:
             return exibitor_meta_items[1].text
     return ''
 
-def get_company_mail(driver):
+
+def get_company_website(driver):
     if meta_company_block(driver):
         exibitor_meta_items = meta_company_block(driver).find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
         if len(exibitor_meta_items) > 2:
@@ -163,12 +189,21 @@ def get_company_mail(driver):
     return ''
 
 
-def main():   
+def get_company_mail(driver):
+    if meta_company_block(driver):
+        exibitor_meta_items = meta_company_block(driver).find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
+        if len(exibitor_meta_items) > 3:
+            return exibitor_meta_items[3].text
+    return ''
+
+
+def main():
     driver = open_url(URL)
     time.sleep(10)  # Дай странице загрузиться (если надо — увеличь)
 
+    create_csv()
 
-    for i in range(0, 3):  # Измените диапазон, если нужно больше или меньше
+    for i in range(0, 16):  # Измените диапазон, если нужно больше или меньше
         print(f'Processing booth with ID: {i}')
 
         booth = get_booth_by_id(driver, i)
@@ -180,15 +215,14 @@ def main():
         # Получаем данные компании из оверлея
 
         company_data = {
+            'id': i,
             'name': get_company_name(driver),
             'description': get_company_description(driver),
+            'address': get_company_address(driver),
             'phone': get_company_phone(driver),
             'website': get_company_website(driver),
             'mail': get_company_mail(driver)
         }
-
-        info_company_block(driver)  # Получаем блок с информацией о компании
-
 
         close_booth(driver)  # Закрываем оверлей
 
@@ -199,6 +233,10 @@ def main():
         time.sleep(5)  # Дай оверлею время на загрузку
 
         print(f'Company data for booth {i}: {company_data}')
+
+
+        # Записываем данные в CSV
+        add_to_csv(company_data.values())
 
     driver.quit()
 
