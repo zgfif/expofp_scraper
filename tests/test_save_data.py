@@ -1,9 +1,15 @@
 import unittest
 import os
-from store_data import create_csv, add_to_csv
+from save_data import create_csv, add_to_csv
 
 
 class TestStoreData(unittest.TestCase):
+    def setUp(self):
+        for filename in ['output.csv', 'custom_exhibitors.csv', 'test_output.csv']:
+            if os.path.exists(filename):
+                os.remove(filename)
+
+
     def test_create_file_with_default_name_and_fields(self):
         # Test if the CSV file is created successfully
         create_csv()
@@ -13,24 +19,29 @@ class TestStoreData(unittest.TestCase):
         with open('output.csv', 'r', encoding='utf-8') as file:
             header = file.readline().strip()
             self.assertIn('id,name,description,address,phone,website,mail', header)
-        os.remove('output.csv')
 
     
     def test_create_file_with_custom_name(self):
         # Test if the CSV file is created with a custom name
         create_csv('custom_exhibitors.csv')
+        
         self.assertTrue(os.path.exists('custom_exhibitors.csv'))
 
         with open('custom_exhibitors.csv', 'r', encoding='utf-8') as file:
             header = file.readline().strip()
             self.assertIn('id,name,description,address,phone,website,mail', header)
 
-        os.remove('custom_exhibitors.csv')
 
     def test_add_to_csv(self):
         # Test if data is added to the CSV file correctly
         create_csv('test_output.csv')
-        data = ['1', 'Test Company', 'This is a test description', '123 Test St', '123-456-7890', 'http://test.com', ]
+        data = ['1', 
+                'Test Company', 
+                'This is a test description', 
+                '123 Test St', '123-456-7890', 
+                'http://test.com', 
+                'mail@example.com'
+        ]
 
         add_to_csv(data, 'test_output.csv')
 
@@ -42,7 +53,13 @@ class TestStoreData(unittest.TestCase):
             self.assertEqual(first_line, ['id', 'name', 'description', 'address', 'phone', 'website', 'mail'])
             self.assertEqual(last_line, data)
             self.assertEqual(len(lines), 2)
-
+   
+    
+    def tearDown(self):
+        # Clean up the created files after tests
+        for filename in ['output.csv', 'custom_exhibitors.csv', 'test_output.csv']:
+            if os.path.exists(filename):
+                os.remove(filename)
 
 
 if __name__ == '__main__':

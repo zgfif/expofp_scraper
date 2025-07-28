@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
-from store_data import create_csv, add_to_csv
+from save_data import create_csv, add_to_csv
 
 URL = 'https://ice25.expofp.com/'
 
