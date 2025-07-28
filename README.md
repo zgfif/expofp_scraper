@@ -1,10 +1,26 @@
-This is a Selenium scraper designed to retrieve companies information from https://ice25.expofp.com/ and save it to the `output.csv` file
+# ExpoFP Selenium Scraper
 
-## Steps to reproduce:
+This is a Selenium-based Python scraper that retrieves company information from [ICE25 ExpoFP](https://ice25.expofp.com/) and saves it to `output.csv`.
 
 ## Prerequisites
 1. Install Google Chrome
-2. `pip install -r requirements.txt`
+2. Python 3.7+ recommended
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
 
-then, run:
-`python main.py`
+## Usage
+Run the scraper:
+```
+python main.py
+```
+The results will be saved to `output.csv`.
+
+## Running Tests
+```
+python -m unittest discover -s tests
+```
+
+<!-- Optionally add contact/contribution info here -->
+
