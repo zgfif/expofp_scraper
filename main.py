@@ -2,23 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
-import csv
-
+from store_data import create_csv, add_to_csv
 
 URL = 'https://ice25.expofp.com/'
 
-
-def create_csv(filename='output.csv'):
-    with open(filename, mode='w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        # Записываем заголовки столбцов
-        writer.writerow(['id', 'name', 'description', 'phone', 'website', 'mail'])
-
-
-def add_to_csv(data: list, filename='output.csv'):
-    with open(filename, mode='a', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow(data)
 
 
 def expand_shadow_element(driver, element):
