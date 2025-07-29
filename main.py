@@ -4,8 +4,12 @@ from selenium.webdriver.chrome.options import Options
 import time
 from save_data import create_csv, add_to_csv
 
+# URL of the ExpoFP page
 URL = 'https://ice25.expofp.com/'
 
+# Number of booths to process
+# Adjust this value based on the actual number of booths available
+BOOTH_COUNT = 5
 
 
 def expand_shadow_element(driver, element):
@@ -152,7 +156,7 @@ def meta_company_block(driver):
     return None
 
 
-def get_company_address(driver):
+def get_company_address(driver) -> str:
     if meta_company_block(driver):
         exibitor_meta_items = meta_company_block(driver).find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
         if len(exibitor_meta_items) > 0:
@@ -160,7 +164,7 @@ def get_company_address(driver):
     return ''
 
 
-def get_company_phone(driver):
+def get_company_phone(driver) -> str:
     if meta_company_block(driver):
         exibitor_meta_items = meta_company_block(driver).find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
         if len(exibitor_meta_items) > 1:
@@ -168,7 +172,7 @@ def get_company_phone(driver):
     return ''
 
 
-def get_company_website(driver):
+def get_company_website(driver) -> str:
     if meta_company_block(driver):
         exibitor_meta_items = meta_company_block(driver).find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
         if len(exibitor_meta_items) > 2:
@@ -176,7 +180,7 @@ def get_company_website(driver):
     return ''
 
 
-def get_company_mail(driver):
+def get_company_mail(driver) -> str:
     if meta_company_block(driver):
         exibitor_meta_items = meta_company_block(driver).find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
         if len(exibitor_meta_items) > 3:
@@ -184,13 +188,14 @@ def get_company_mail(driver):
     return ''
 
 
-def main():
+def main() -> None:
     driver = open_url(URL)
+
     time.sleep(10)  # Дай странице загрузиться (если надо — увеличь)
 
     create_csv()
 
-    for i in range(0, 16):  # Измените диапазон, если нужно больше или меньше
+    for i in range(0, BOOTH_COUNT):  # Измените диапазон, если нужно больше или меньше
         print(f'Processing booth with ID: {i}')
 
         booth = get_booth_by_id(driver, i)
