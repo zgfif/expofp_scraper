@@ -22,9 +22,9 @@ def main() -> None:
 
     for i in range(0, BOOTH_COUNT):  # Измените диапазон, если нужно больше или меньше
         print(f'Processing booth with ID: {i}')
-        scraper.move_to_shadow_root()
+        scraper.find_shadow_root()
         
-        scraper.move_to_booths_block()
+        scraper.find_booths_div()
         
         scraper.get_booth_by_id(i)
 

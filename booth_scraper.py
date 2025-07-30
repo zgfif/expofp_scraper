@@ -9,11 +9,12 @@ class BoothScraper:
         self.url = url
         self._driver = None
         self.shadow_root = None
-        self.booth_block = None
+        self.booths_div = None
         self.booth = None
         self.close_button = None
 
 
+    # this method is used to process url and initalize driver
     def open_url(self) -> webdriver.Chrome:
         """        Opens the specified URL in a Chrome browser and initializes the driver.
         :return: The initialized    webdriver.Chrome instance.
@@ -23,7 +24,7 @@ class BoothScraper:
         return self._driver
 
 
-    def move_to_shadow_root(self) -> None:
+    def find_shadow_root(self) -> None:
         """Moves the driver to the shadow root of the page."""
 
         if not self._driver:
@@ -33,10 +34,10 @@ class BoothScraper:
         self.shadow_root = self._driver.execute_script("return arguments[0].shadowRoot", shadow_host)
 
 
-    def move_to_booths_block(self) -> None:
-        """Moves the driver to the booths block within the shadow root."""
+    def find_booths_div(self) -> None:
+        """Finds booths div within the shadow root."""
         if not self.shadow_root:
-            raise ValueError("Shadow root position is not initialized. Call move_to_shadow_root() first.")
+            raise ValueError("Shadow root position is not initialized. Call find_shadow_root() first.")
         
         efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
         layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
@@ -45,7 +46,7 @@ class BoothScraper:
         scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
         virtual_scroll = scrollable.find_element(By.CSS_SELECTOR, 'div[style="height: 100%; cursor: pointer; resize: both; min-height: 100px;"]')
         
-        self.booth_block = virtual_scroll.find_element(By.CSS_SELECTOR, 'div[data-virtuoso-scroller="true"] > div > div')
+        self.booths_div = virtual_scroll.find_element(By.CSS_SELECTOR, 'div[data-virtuoso-scroller="true"] > div > div')
 
 
     def get_close_button(self):
@@ -54,7 +55,7 @@ class BoothScraper:
         self.close_button = None
         
         if not self.shadow_root:
-            raise ValueError("Shadow root position is not initialized. Call move_to_shadow_root() first.")
+            raise ValueError("Shadow root position is not initialized. Call find_shadow_root() first.")
 
         efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
         layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
@@ -67,10 +68,10 @@ class BoothScraper:
 
     def count_of_booths(self) -> int:
         """Counts the number of booths in the shadow root."""
-        if not self.booth_block:
-            raise ValueError("Booth block is not initialized. Call move_to_booths_block() first.")
+        if not self.booths_div:
+            raise ValueError("Booth block is not initialized. Call find_booths_div() first.")
 
-        items = self.booth_block.find_elements(By.CSS_SELECTOR, 'div[data-index]')
+        items = self.booths_div.find_elements(By.CSS_SELECTOR, 'div[data-index]')
         
         return len(items)
     
@@ -79,10 +80,10 @@ class BoothScraper:
         self.booth = None
 
         """Gets a booth element by its ID."""
-        if not self.booth_block:
-            raise ValueError("Booth block is not initialized. Call move_to_booths_block() first.")
+        if not self.booths_div:
+            raise ValueError("Booth block is not initialized. Call find_booths_div() first.")
 
-        elements = self.booth_block.find_elements(By.CSS_SELECTOR, f'div[data-index="{id}"]')
+        elements = self.booths_div.find_elements(By.CSS_SELECTOR, f'div[data-index="{id}"]')
         
         if elements:
             self.booth = elements[0]
