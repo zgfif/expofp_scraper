@@ -57,7 +57,7 @@ class TestBoothScraper(unittest.TestCase):
     def test_opening_booth_by_id(self):
         self.scraper.find_shadow_root()
         self.scraper.find_booths_div()
-        self.scraper.get_booth_by_id(0)
+        self.scraper.find_booth(0)
         self.assertIsNotNone(self.scraper.booth, "Booth with ID 0 should not be None")
     #     time.sleep(5)
         self.scraper.booth.click()
@@ -68,21 +68,21 @@ class TestBoothScraper(unittest.TestCase):
         self.scraper.find_shadow_root()
         self.scraper.find_booths_div()
 
-        self.scraper.get_booth_by_id(9999)
+        self.scraper.find_booth(9999)
         self.assertIsNone(self.scraper.booth, "Booth with invalid ID should be None")
 
     
     def test_extract_company_details(self):
         self.assertIsNone(self.scraper.booth, "Booth should be None before clicking")
-        self.assertIsNone(self.scraper.close_button, "Close button should be None before clicking")
+        self.assertIsNone(self.scraper.close_booth_button, "Close button should be None before clicking")
 
         self.scraper.find_shadow_root()
         self.scraper.find_booths_div()
-        self.scraper.get_booth_by_id(0)
+        self.scraper.find_booth(0)
         self.scraper.booth.click()
         sleep(5)
-        self.scraper.get_close_button()
-        self.assertIsNotNone(self.scraper.close_button, "Close button should not be None after clicking booth")
+        self.scraper.find_close_booth_button()
+        self.assertIsNotNone(self.scraper.close_booth_button, "Close button should not be None after clicking booth")
 
         company_details = self.scraper.extract_company_details()
 
@@ -97,7 +97,7 @@ class TestBoothScraper(unittest.TestCase):
 
         print(company_details)
 
-        self.scraper.close_button.click()
+        self.scraper.close_booth_button.click()
         sleep(5)
 
     def test_scroll_a_bit(self):

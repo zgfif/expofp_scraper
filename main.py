@@ -26,7 +26,7 @@ def main() -> None:
         
         scraper.find_booths_div()
         
-        scraper.get_booth_by_id(i)
+        scraper.find_booth(id=i)
 
         scraper.booth.click()
 
@@ -36,7 +36,7 @@ def main() -> None:
         
         data = {'id': i, **company_data}
         
-        scraper.get_close_button()        
+        scraper.find_close_booth_button()        
 
         time.sleep(5)  # Дай оверлею время на загрузку
 
@@ -46,7 +46,7 @@ def main() -> None:
         # Записываем данные в CSV
         add_to_csv(data.values())
 
-        scraper.close_button.click()
+        scraper.close_booth_button.click()
 
         scraper.scroll_a_bit()
 
