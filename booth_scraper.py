@@ -91,6 +91,15 @@ class BoothScraper:
 
 
     def extract_company_details(self) -> dict:
+        company_details = {
+            'name': '',
+            'description': '',
+            'address': '',
+            'phone': '',
+            'website': '',
+            'email': '',
+        }
+
         """Extracts company details from the booth."""
         efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
         layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
@@ -98,7 +107,7 @@ class BoothScraper:
         overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
         overlay_bar = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-bar')
         
-        name = overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
+        company_details['name'] = overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
 
         overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
         overlay_content_scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
@@ -109,12 +118,11 @@ class BoothScraper:
         else:
             exhibitor_details = None
         
-        description = ''
-
         if exhibitor_details:
             exibitor_description = exhibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-description')
-        if exibitor_description:
-            description = exibitor_description[0].text
+            
+            if exibitor_description:
+                company_details['description'] = exibitor_description[0].text
 
 
         if exhibitor_details:
@@ -126,23 +134,13 @@ class BoothScraper:
                 meta_block = exibitor_meta[0]
             if meta_block:
                 exibitor_meta_items = meta_block.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
-
-
             
-            address = exibitor_meta_items[0].text if len(exibitor_meta_items) > 0 else ''
-            phone = exibitor_meta_items[1].text if len(exibitor_meta_items) > 1 else ''
-            website = exibitor_meta_items[2].text if len(exibitor_meta_items) > 2 else ''
-            mail = exibitor_meta_items[3].text if len(exibitor_meta_items) > 3 else ''
-            # Assuming the meta block contains address, phone, website, and mail    
+                company_details['address'] = exibitor_meta_items[0].text if len(exibitor_meta_items) > 0 else ''
+                company_details['phone'] = exibitor_meta_items[1].text if len(exibitor_meta_items) > 1 else ''
+                company_details['website'] = exibitor_meta_items[2].text if len(exibitor_meta_items) > 2 else ''
+                company_details['mail'] = exibitor_meta_items[3].text if len(exibitor_meta_items) > 3 else ''
         
-        return {
-            'name': name, 
-            'description': description,  # Placeholder for description
-            'address': address,      # Placeholder for address
-            'phone': phone,        # Placeholder for phone
-            'website': website,      # Placeholder for website
-            'mail': mail,
-        }         # Placeholder for mail
+        return company_details
 
 
     def terminate(self):
