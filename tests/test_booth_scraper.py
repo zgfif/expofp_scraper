@@ -26,7 +26,7 @@ class TestBoothScraper(unittest.TestCase):
 
 
     def test_scraper_initialization(self):
-        self.assertIsNone(self.scraper.shadow_root_position, "Shadow root position should be None before moving to shadow root")
+        self.assertIsNone(self.scraper.shadow_root, "Shadow root position should be None before moving to shadow root")
         self.assertIsNone(self.scraper.booth_block, "Booth block should be None before moving to booths block")
         self.assertIsNotNone(self.scraper.driver, "Driver should be not None after opening URL")
         self.assertEqual(self.scraper.url, self.url, "URL should match the initialized value")
@@ -44,7 +44,7 @@ class TestBoothScraper(unittest.TestCase):
     def test_driver_in_shadow_root(self):
         self.scraper.move_to_shadow_root()
 
-        self.assertIsNotNone(self.scraper.shadow_root_position, "Shadow root position should not be None")
+        self.assertIsNotNone(self.scraper.shadow_root, "Shadow root position should not be None")
 
 
     def test_opening_booth_block(self):
@@ -99,4 +99,8 @@ class TestBoothScraper(unittest.TestCase):
 
         self.scraper.close_button.click()
         sleep(5)
+
+    def test_scroll_a_bit(self):
+        self.scraper.move_to_shadow_root()
+        self.scraper.scroll_a_bit(200)
 

@@ -8,7 +8,7 @@ class BoothScraper:
     def __init__(self, url: str ='') -> None:
         self.url = url
         self._driver = None
-        self.shadow_root_position = None
+        self.shadow_root = None
         self.booth_block = None
         self.booth = None
         self.close_button = None
@@ -30,15 +30,15 @@ class BoothScraper:
             raise ValueError("Driver is not initialized. Call open_url() first.")
         
         shadow_host = self._driver.find_element(By.CSS_SELECTOR, 'div.expofp-floorplan > div')
-        self.shadow_root_position = self._driver.execute_script("return arguments[0].shadowRoot", shadow_host)
+        self.shadow_root = self._driver.execute_script("return arguments[0].shadowRoot", shadow_host)
 
 
     def move_to_booths_block(self) -> None:
         """Moves the driver to the booths block within the shadow root."""
-        if not self.shadow_root_position:
+        if not self.shadow_root:
             raise ValueError("Shadow root position is not initialized. Call move_to_shadow_root() first.")
         
-        efp_layout = self.shadow_root_position.find_element(By.CSS_SELECTOR, 'div#efp-layout')
+        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
         layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
         overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
         overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
@@ -53,10 +53,10 @@ class BoothScraper:
         
         self.close_button = None
         
-        if not self.shadow_root_position:
+        if not self.shadow_root:
             raise ValueError("Shadow root position is not initialized. Call move_to_shadow_root() first.")
 
-        efp_layout = self.shadow_root_position.find_element(By.CSS_SELECTOR, 'div#efp-layout')
+        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
         layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
         overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
         overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
@@ -92,7 +92,7 @@ class BoothScraper:
 
     def extract_company_details(self) -> dict:
         """Extracts company details from the booth."""
-        efp_layout = self.shadow_root_position.find_element(By.CSS_SELECTOR, 'div#efp-layout')
+        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
         layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
         overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
         overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
@@ -149,6 +149,17 @@ class BoothScraper:
         if self._driver:
             self._driver.quit()
             self._driver = None  # Reset the driver to None after quitting
+
+
+    def scroll_a_bit(self, pixels : int = 100):
+        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
+        layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
+        overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
+        overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
+        scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
+
+        self.driver.execute_script(f"arguments[0].scrollTop = arguments[0].scrollTop + {pixels};", scrollable)
+
 
     @property
     def driver(self):
