@@ -31,12 +31,12 @@ class BoothScraper:
         Moves the driver to the shadow root of the page.
         """
 
-        if not self._driver:
+        if not self.driver:
             raise ValueError("Driver is not initialized. Call open_url() first.")
         
-        shadow_host = self._driver.find_element(By.CSS_SELECTOR, 'div.expofp-floorplan > div')
+        shadow_host = self.driver.find_element(By.CSS_SELECTOR, 'div.expofp-floorplan > div')
 
-        self.shadow_root = self._driver.execute_script("return arguments[0].shadowRoot", shadow_host)
+        self.shadow_root = self.driver.execute_script("return arguments[0].shadowRoot", shadow_host)
 
 
     def find_booths_div(self) -> None:
@@ -113,10 +113,10 @@ class BoothScraper:
 
     def terminate(self):
         """
-        Terminates the driver 'self._driver.quit()' and resets self._driver = None. Run it after finishing of scraping.
+        Terminates the driver 'self.driver.quit()' and resets self.driver = None. Run it after finishing of scraping.
         """
-        if self._driver:
-            self._driver.quit()
+        if self.driver:
+            self.driver.quit()
             self._driver = None  # Reset the driver to None after quitting
 
 
@@ -143,7 +143,7 @@ class BoothScraper:
         return overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
 
 
-    def _exibitor_details(self):
+    def _exhibitor_details(self):
         """ this div can contain all description, adress, phone, website, email"""
         overlay_content_scrollable = self._overlay_content_scrollable()
 
@@ -153,14 +153,14 @@ class BoothScraper:
     
 
     def _extract_name(self):
-            overlay_bar = self._overlay_bar()
-            return overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
+        overlay_bar = self._overlay_bar()
+        return overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
 
 
     def _extract_description(self) -> str:
         description = ''
         
-        exibitor_details = self._exibitor_details()
+        exibitor_details = self._exhibitor_details()
         
         if exibitor_details:
             exibitor_description = exibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-description')
@@ -175,7 +175,7 @@ class BoothScraper:
         
         dct = {'address': '', 'phone': '', 'website': '', 'email': ''}
         
-        exibitor_details = self._exibitor_details() 
+        exibitor_details = self._exhibitor_details() 
         
         if exibitor_details:
             exibitor_meta = exibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta')
@@ -190,7 +190,7 @@ class BoothScraper:
                 dct['address'] = exibitor_meta_items[0].text if len(exibitor_meta_items) > 0 else ''
                 dct['phone'] = exibitor_meta_items[1].text if len(exibitor_meta_items) > 1 else ''
                 dct['website'] = exibitor_meta_items[2].text if len(exibitor_meta_items) > 2 else ''
-                dct['mail'] = exibitor_meta_items[3].text if len(exibitor_meta_items) > 3 else ''
+                dct['email'] = exibitor_meta_items[3].text if len(exibitor_meta_items) > 3 else ''
 
 
         return dct

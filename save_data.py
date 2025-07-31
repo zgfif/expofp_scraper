@@ -6,7 +6,7 @@ def create_csv(filename='output.csv') -> None:
     Creates a new CSV file with predefined column headers.
     """
     
-    table_column_names = ('id', 'name', 'description', 'address', 'phone', 'website', 'mail')
+    table_column_names = ('id', 'name', 'description', 'address', 'phone', 'website', 'email')
     
     try:
         with open(filename, mode='w', newline='', encoding='utf-8') as file:

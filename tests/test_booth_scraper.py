@@ -93,7 +93,7 @@ class TestBoothScraper(unittest.TestCase):
         self.assertIn('address', company_details, "Company details should contain 'address'")
         self.assertIn('phone', company_details, "Company details should contain 'phone'")
         self.assertIn('website', company_details, "Company details should contain 'website'")
-        self.assertIn('mail', company_details, "Company details should contain 'mail'")
+        self.assertIn('email', company_details, "Company details should contain 'email'")
 
         print(company_details)
 
