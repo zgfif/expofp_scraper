@@ -5,7 +5,6 @@ def create_csv(filename='output.csv') -> None:
     """
     Creates a new CSV file with predefined column headers.
     """
-    
     table_column_names = ('id', 'name', 'description', 'address', 'phone', 'website', 'email')
     
     try:
@@ -21,7 +20,6 @@ def add_to_csv(data: list[str], filename='output.csv') -> None:
     """
     Appends a row of data to the CSV file.
     """
-
     try:
         with open(filename, mode='a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)

@@ -172,7 +172,13 @@ class BoothScraper:
 
     def _extract_additional_details(self) -> dict:
         """extracting address, phone, website, email. returns dict"""
-        
+        icons = {
+            'icon-marker-pin-solid': 'address',
+            'icon-phone-solid': 'phone',
+            'icon-globe-solid': 'website',
+            'icon-mail-at-solid': 'email',
+        }
+
         dct = {'address': '', 'phone': '', 'website': '', 'email': ''}
         
         exibitor_details = self._exhibitor_details() 
@@ -186,12 +192,13 @@ class BoothScraper:
                 meta_block = exibitor_meta[0]
             if meta_block:
                 exibitor_meta_items = meta_block.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
-            
-                dct['address'] = exibitor_meta_items[0].text if len(exibitor_meta_items) > 0 else ''
-                dct['phone'] = exibitor_meta_items[1].text if len(exibitor_meta_items) > 1 else ''
-                dct['website'] = exibitor_meta_items[2].text if len(exibitor_meta_items) > 2 else ''
-                dct['email'] = exibitor_meta_items[3].text if len(exibitor_meta_items) > 3 else ''
 
+                for item in exibitor_meta_items:
+                    container = item.find_element(By.CSS_SELECTOR, "div.exhibitor-meta__icon")
+                    icon = container.find_element(By.TAG_NAME, "i")
+                    icon_class = icon.get_attribute("class")
+  
+                    dct[icons[icon_class]] = item.text
 
         return dct
  

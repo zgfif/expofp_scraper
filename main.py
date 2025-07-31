@@ -9,7 +9,7 @@ URL = 'https://ice25.expofp.com/'
 
 # Number of booths to process
 # Adjust this value based on the actual number of booths available
-BOOTH_COUNT = 171
+BOOTH_COUNT = 15
 
 
 def main() -> None:
