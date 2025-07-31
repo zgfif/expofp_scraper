@@ -44,11 +44,9 @@ class BoothScraper:
     def find_booths_div(self) -> None:
         """Finds booths div within the shadow root."""
 
-        overlay_content = self.overlay_content()
+        overlay_content_scrollable = self._overlay_content_scrollable()
         
-        scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
-        
-        virtual_scroll = scrollable.find_element(By.CSS_SELECTOR, 'div[style="height: 100%; cursor: pointer; resize: both; min-height: 100px;"]')
+        virtual_scroll = overlay_content_scrollable.find_element(By.CSS_SELECTOR, 'div[style="height: 100%; cursor: pointer; resize: both; min-height: 100px;"]')
         
         self.booths_div = virtual_scroll.find_element(By.CSS_SELECTOR, 'div[data-virtuoso-scroller="true"] > div > div')
 
@@ -56,17 +54,19 @@ class BoothScraper:
     def find_close_booth_button(self) -> None:
         """
         Finds the close button in booth details.
-        """
-        
+        """        
         self.close_booth_button = None
-        
-        overlay_content = self.overlay_content()
-        
-        overlay_bar = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-bar')
+
+        overlay_bar = self._overlay_bar()
         
         overlay_bar_close = overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__close')
         
         self.close_booth_button = overlay_bar_close.find_element(By.CSS_SELECTOR, 'button')
+
+
+    def _extract_name(self):
+        overlay_bar = self._overlay_bar()
+        return overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
 
 
     def count_of_booths(self) -> int:
@@ -109,30 +109,20 @@ class BoothScraper:
             'email': '',
         }
 
-        """Extracts company details from the booth."""
-        overlay_content = self.overlay_content()
+        company_details['name'] = self._extract_name()
 
-        overlay_bar = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-bar')
-        
-        company_details['name'] = overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
-
-        overlay_content_scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
-        exhibitor_details = overlay_content_scrollable.find_elements(By.CSS_SELECTOR, 'div.exhibitor__details')
-        
-        if exhibitor_details:
-            exhibitor_details = exhibitor_details[0]
-        else:
-            exhibitor_details = None
-        
-        if exhibitor_details:
-            exibitor_description = exhibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-description')
+        exibitor_details = self._exibitor_details()
+        # extracting description
+        if exibitor_details:
+            exibitor_description = exibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-description')
             
             if exibitor_description:
                 company_details['description'] = exibitor_description[0].text
 
 
-        if exhibitor_details:
-            exibitor_meta = exhibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta')
+        # extracting address, phone, website, email
+        if exibitor_details:
+            exibitor_meta = exibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta')
             
             meta_block = None
             
@@ -162,15 +152,11 @@ class BoothScraper:
         """
         Scrolls DOWN booths in booths_div. Should be performed after closing of the scraped booth. Default scroll is 100px.
         """
-        
-        overlay_content = self.overlay_content()
-        
-        scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
-
-        self.driver.execute_script(f"arguments[0].scrollTop = arguments[0].scrollTop + {pixels};", scrollable)
+        overlay_content_scrollable = self._overlay_content_scrollable()
+        self.driver.execute_script(f"arguments[0].scrollTop = arguments[0].scrollTop + {pixels};", overlay_content_scrollable)
 
 
-    def overlay_content(self):
+    def _overlay_content(self):
         if not self.shadow_root:
             raise ValueError("Shadow root position is not initialized. Call find_shadow_root() first.")
         
@@ -180,6 +166,27 @@ class BoothScraper:
         
         return overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
               
+
+    def _overlay_bar(self):
+        overlay_content = self._overlay_content()
+
+        return overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-bar') # contains company_name and 
+    
+
+    def _overlay_content_scrollable(self):
+        overlay_content = self._overlay_content()
+
+        return overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
+
+
+    def _exibitor_details(self):
+        """ this div can contain all description, adress, phone, website, email"""
+        overlay_content_scrollable = self._overlay_content_scrollable()
+
+        exhibitor_details = overlay_content_scrollable.find_elements(By.CSS_SELECTOR, 'div.exhibitor__details')
+
+        return exhibitor_details[0] if exhibitor_details else None
+    
 
     @property
     def driver(self):
