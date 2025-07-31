@@ -9,7 +9,7 @@ URL = 'https://ice25.expofp.com/'
 
 # Number of booths to process
 # Adjust this value based on the actual number of booths available
-BOOTH_COUNT = 5
+BOOTH_COUNT = 15
 
 
 def main() -> None:
@@ -41,7 +41,6 @@ def main() -> None:
         time.sleep(5)  # Дай оверлею время на загрузку
 
         print(f'Company data for booth {i}: {data}')
-
 
         # Записываем данные в CSV
         add_to_csv(data.values())

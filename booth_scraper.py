@@ -43,14 +43,11 @@ class BoothScraper:
 
     def find_booths_div(self) -> None:
         """Finds booths div within the shadow root."""
-        if not self.shadow_root:
-            raise ValueError("Shadow root position is not initialized. Call find_shadow_root() first.")
+
+        overlay_content = self.overlay_content()
         
-        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
-        layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
-        overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
-        overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
         scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
+        
         virtual_scroll = scrollable.find_element(By.CSS_SELECTOR, 'div[style="height: 100%; cursor: pointer; resize: both; min-height: 100px;"]')
         
         self.booths_div = virtual_scroll.find_element(By.CSS_SELECTOR, 'div[data-virtuoso-scroller="true"] > div > div')
@@ -63,14 +60,10 @@ class BoothScraper:
         
         self.close_booth_button = None
         
-        if not self.shadow_root:
-            raise ValueError("Shadow root position is not initialized. Call find_shadow_root() first.")
-
-        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
-        layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
-        overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
-        overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
+        overlay_content = self.overlay_content()
+        
         overlay_bar = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-bar')
+        
         overlay_bar_close = overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__close')
         
         self.close_booth_button = overlay_bar_close.find_element(By.CSS_SELECTOR, 'button')
@@ -117,15 +110,12 @@ class BoothScraper:
         }
 
         """Extracts company details from the booth."""
-        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
-        layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
-        overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
-        overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
+        overlay_content = self.overlay_content()
+
         overlay_bar = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-bar')
         
         company_details['name'] = overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
 
-        overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
         overlay_content_scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
         exhibitor_details = overlay_content_scrollable.find_elements(By.CSS_SELECTOR, 'div.exhibitor__details')
         
@@ -172,14 +162,24 @@ class BoothScraper:
         """
         Scrolls DOWN booths in booths_div. Should be performed after closing of the scraped booth. Default scroll is 100px.
         """
-        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
-        layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
-        overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
-        overlay_content = overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
+        
+        overlay_content = self.overlay_content()
+        
         scrollable = overlay_content.find_element(By.CSS_SELECTOR, 'div.overlay-content__scrollable')
 
         self.driver.execute_script(f"arguments[0].scrollTop = arguments[0].scrollTop + {pixels};", scrollable)
 
+
+    def overlay_content(self):
+        if not self.shadow_root:
+            raise ValueError("Shadow root position is not initialized. Call find_shadow_root() first.")
+        
+        efp_layout = self.shadow_root.find_element(By.CSS_SELECTOR, 'div#efp-layout')
+        layout_fixed = efp_layout.find_element(By.CSS_SELECTOR, 'div.layout__fixed')
+        overlay = layout_fixed.find_element(By.CSS_SELECTOR, 'div.overlay')
+        
+        return overlay.find_element(By.CSS_SELECTOR, 'div#overlay-content')
+              
 
     @property
     def driver(self):
