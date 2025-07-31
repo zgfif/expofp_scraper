@@ -1,13 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-# from time import sleep
 
 
 class BoothScraper:
     """
     A class to handle the scraping of booth data from ExpoFP.
     """
-
     def __init__(self, url: str ='') -> None:
         self.url = url
         self._driver = None
@@ -64,11 +62,6 @@ class BoothScraper:
         self.close_booth_button = overlay_bar_close.find_element(By.CSS_SELECTOR, 'button')
 
 
-    def _extract_name(self):
-        overlay_bar = self._overlay_bar()
-        return overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
-
-
     def count_of_booths(self) -> int:
         """
         Returns the count of visible booths in the shadow root.
@@ -101,42 +94,21 @@ class BoothScraper:
         from the opened booth. Before calling this method you have to call: 'booth.click()'.
         """
         company_details = {
-            'name': '',
-            'description': '',
-            'address': '',
-            'phone': '',
-            'website': '',
-            'email': '',
+            'name': self._extract_name(),
+            'description': self._extract_description(),
         }
 
-        company_details['name'] = self._extract_name()
-
-        exibitor_details = self._exibitor_details()
-        # extracting description
-        if exibitor_details:
-            exibitor_description = exibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-description')
-            
-            if exibitor_description:
-                company_details['description'] = exibitor_description[0].text
-
-
-        # extracting address, phone, website, email
-        if exibitor_details:
-            exibitor_meta = exibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta')
-            
-            meta_block = None
-            
-            if exibitor_meta:
-                meta_block = exibitor_meta[0]
-            if meta_block:
-                exibitor_meta_items = meta_block.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
-            
-                company_details['address'] = exibitor_meta_items[0].text if len(exibitor_meta_items) > 0 else ''
-                company_details['phone'] = exibitor_meta_items[1].text if len(exibitor_meta_items) > 1 else ''
-                company_details['website'] = exibitor_meta_items[2].text if len(exibitor_meta_items) > 2 else ''
-                company_details['mail'] = exibitor_meta_items[3].text if len(exibitor_meta_items) > 3 else ''
+        additional_details = self._extract_additional_details()
         
-        return company_details
+        return {**company_details, **additional_details}
+
+
+    def scroll_a_bit(self, pixels : int = 100):
+        """
+        Scrolls DOWN booths in booths_div. Should be performed after closing of the scraped booth. Default scroll is 100px.
+        """
+        overlay_content_scrollable = self._overlay_content_scrollable()
+        self.driver.execute_script(f"arguments[0].scrollTop = arguments[0].scrollTop + {pixels};", overlay_content_scrollable)
 
 
     def terminate(self):
@@ -146,14 +118,6 @@ class BoothScraper:
         if self._driver:
             self._driver.quit()
             self._driver = None  # Reset the driver to None after quitting
-
-
-    def scroll_a_bit(self, pixels : int = 100):
-        """
-        Scrolls DOWN booths in booths_div. Should be performed after closing of the scraped booth. Default scroll is 100px.
-        """
-        overlay_content_scrollable = self._overlay_content_scrollable()
-        self.driver.execute_script(f"arguments[0].scrollTop = arguments[0].scrollTop + {pixels};", overlay_content_scrollable)
 
 
     def _overlay_content(self):
@@ -188,6 +152,50 @@ class BoothScraper:
         return exhibitor_details[0] if exhibitor_details else None
     
 
+    def _extract_name(self):
+            overlay_bar = self._overlay_bar()
+            return overlay_bar.find_element(By.CSS_SELECTOR, 'div.overlay-bar__slot').text
+
+
+    def _extract_description(self) -> str:
+        description = ''
+        
+        exibitor_details = self._exibitor_details()
+        
+        if exibitor_details:
+            exibitor_description = exibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-description')
+            
+            if exibitor_description:
+                description = exibitor_description[0].text
+        return description
+
+
+    def _extract_additional_details(self) -> dict:
+        """extracting address, phone, website, email. returns dict"""
+        
+        dct = {'address': '', 'phone': '', 'website': '', 'email': ''}
+        
+        exibitor_details = self._exibitor_details() 
+        
+        if exibitor_details:
+            exibitor_meta = exibitor_details.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta')
+            
+            meta_block = None
+            
+            if exibitor_meta:
+                meta_block = exibitor_meta[0]
+            if meta_block:
+                exibitor_meta_items = meta_block.find_elements(By.CSS_SELECTOR, 'div.exhibitor-meta__item')
+            
+                dct['address'] = exibitor_meta_items[0].text if len(exibitor_meta_items) > 0 else ''
+                dct['phone'] = exibitor_meta_items[1].text if len(exibitor_meta_items) > 1 else ''
+                dct['website'] = exibitor_meta_items[2].text if len(exibitor_meta_items) > 2 else ''
+                dct['mail'] = exibitor_meta_items[3].text if len(exibitor_meta_items) > 3 else ''
+
+
+        return dct
+ 
+ 
     @property
     def driver(self):
         return self._driver
