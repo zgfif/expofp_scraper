@@ -1,60 +1,42 @@
-import time
 from save_data import create_csv, add_to_csv
-from booth_scraper import BoothScraper
+from booth_menu import BoothMenu
+from booth_page import BoothPage
 
 
-# URL of the ExpoFP page
-URL = 'https://ice25.expofp.com/'
+BOOTH_COUNT= 171
 
 
-# Number of booths to process
-# Adjust this value based on the actual number of booths available
-BOOTH_COUNT = 15
-
-
-def main() -> None:
-    scraper = BoothScraper(URL)
-    scraper.open_url()
-
-    time.sleep(10)  # Дай странице загрузиться (если надо — увеличь)
+def main():
+    bm = BoothMenu()
 
     create_csv()
 
-    for i in range(0, BOOTH_COUNT):  # Измените диапазон, если нужно больше или меньше
-        print(f'Processing booth with ID: {i}')
-        scraper.find_shadow_root()
+    for i in range(0, BOOTH_COUNT):
+        print(f'Processing {i} booth...')
         
-        scraper.find_booths_div()
+        position = bm.find_booth_position(i)
         
-        scraper.find_booth(id=i)
-
-        scraper.booth.click()
-
-        time.sleep(5)
-
-        company_data = scraper.extract_company_details()
+        bp = BoothPage(position, bm._driver)
         
-        data = {'id': i, **company_data}
+        details = {
+            'id': i,
+            'name': bp.extract_name(),
+            'description': bp.extract_description(),
+            **bp.extract_additional_details()
+        }
+
+        print(details)
         
-        scraper.find_close_booth_button()        
+        add_to_csv(details.values())
+        
+        bp.close()
 
-        time.sleep(5)  # Дай оверлею время на загрузку
+        bm.scroll_a_bit()
 
-        print(f'Company data for booth {i}: {data}')
+    bm.terminate()
 
-        # Записываем данные в CSV
-        add_to_csv(data.values())
-
-        scraper.close_booth_button.click()
-
-        scraper.scroll_a_bit()
-
-    scraper.terminate()
-
-    print(f'Scraping {BOOTH_COUNT} booths is finished!')
+    print(f'Parsing has been finished! Parsed {BOOTH_COUNT} booths.')
 
 
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

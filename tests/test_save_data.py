@@ -60,7 +60,3 @@ class TestStoreData(unittest.TestCase):
         for filename in ['output.csv', 'custom_exhibitors.csv', 'test_output.csv']:
             if os.path.exists(filename):
                 os.remove(filename)
-
-
-if __name__ == '__main__':
-    unittest.main()
